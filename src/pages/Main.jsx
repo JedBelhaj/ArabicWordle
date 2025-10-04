@@ -64,7 +64,7 @@ function Main() {
     
     
     return <div className="w-screen h-screen bg-neutral-100 flex justify-center items-center flex-col">
-        {<h1 className="font-bold text-6xl m-5">Arabic Wordle !</h1>}
+        {<h1 className="font-bold text-6xl m-5">وردل بالعربية !</h1>}
         <div id="char-grid" className="flex flex-col gap-2">
             {words.map((w, index) => 
                 <Row word={w} key={index} />
