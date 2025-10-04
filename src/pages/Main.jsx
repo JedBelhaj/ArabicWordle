@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Row from "../components/Row";
+import WORD_LENGTH from "../constants";
 
 function Main() {
     const [tries, setTries] = useState(0)
@@ -9,22 +10,39 @@ function Main() {
     const [wordCount, setWordCount] = useState(0)
     const [words, setWords] = useState(["","","","","",""])
     const wordsRef = useRef(["","","","","",""]);
+    const wordCountRef = useRef(0)
     const [keyPressed, setKeyPressed] = useState(false)
 
     const arabicAlphabet = 'Backspaceضصثقفغعهخحجدذشسيبلاتنمكطئءؤرلاىةوزظ'
 
     useEffect(() => {
         const handleInput = (e) => {
-            console.log("words in handleinput begin: " , words);
+            const handlerWordCount = wordCountRef.current
+            console.log("first word count:", handlerWordCount);
             
-            if (e.key.length === 1){
-                const char = e.key
-                const nextWord = wordsRef.current[wordCount].concat(char)
+            console.log("words in handleinput begin: " , words);
+            console.log("char", e.key)
+
+            const updateWord = (nextWord) => {
                 const nextWords = [...wordsRef.current]
-                nextWords.splice(wordCount, 1, nextWord)         
+                nextWords.splice(handlerWordCount, 1, nextWord)
                 console.log("next words:", nextWords);
                 setWords([...nextWords])
                 wordsRef.current = [...nextWords]
+            }
+            
+            if (e.key.length === 1){
+                const char = e.key
+                const nextWord = wordsRef.current[handlerWordCount].concat(char)
+                updateWord(nextWord)
+            }
+            else if (e.key === "Backspace") {
+                const nextWord = wordsRef.current[handlerWordCount].substring(0, wordsRef.current[handlerWordCount].length - 1)
+                updateWord(nextWord)
+            } else if (e.key === "Enter" && wordsRef.current[handlerWordCount].length === WORD_LENGTH) {
+                wordCountRef.current++
+                setWordCount(wordCountRef.current)
+                console.log("last word count:", handlerWordCount);
             }
         }
         document.addEventListener("keyup", handleInput)
