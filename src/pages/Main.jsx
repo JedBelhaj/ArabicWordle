@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Row from "../components/Row";
 
 function Main() {
@@ -7,11 +7,29 @@ function Main() {
     const [key, setKey] = useState("")
     const [charCount, setCharCount] = useState(0)
     const [wordCount, setWordCount] = useState(0)
-    const [words, setWords] = useState([])
+    const [words, setWords] = useState(["","","","","",""])
+    const wordsRef = useRef(["","","","","",""]);
     const [keyPressed, setKeyPressed] = useState(false)
 
     const arabicAlphabet = 'Backspaceضصثقفغعهخحجدذشسيبلاتنمكطئءؤرلاىةوزظ'
 
+    useEffect(() => {
+        const handleInput = (e) => {
+            console.log("words in handleinput begin: " , words);
+            
+            if (e.key.length === 1){
+                const char = e.key
+                const nextWord = wordsRef.current[wordCount].concat(char)
+                const nextWords = [...wordsRef.current]
+                nextWords.splice(wordCount, 1, nextWord)         
+                console.log("next words:", nextWords);
+                setWords([...nextWords])
+                wordsRef.current = [...nextWords]
+            }
+        }
+        document.addEventListener("keyup", handleInput)
+        return () => document.removeEventListener("keyup",handleInput)
+    },[])
 
     useEffect(() => {
         console.log("registered words :",words);
@@ -24,24 +42,8 @@ function Main() {
         }
     }, [tries])
 
-    useEffect(() => {
-        console.log('this works once');
-        setWords(["","","","","",""])
-        window.addEventListener("keyup", handleInput)
-    }, [])
-
-    const handleInput = (e) => {
-        console.log(words);
-        
-        if (e.key.length === 1){
-            const char = e.key
-            const nextWord = words[wordCount].concat(char)
-            const nextWords = [...words]
-            nextWords.splice(wordCount, 1, nextWord)         
-            console.log("next words:", nextWords);
-            setWords(nextWords)
-        }
-    }
+    
+    
     
     return <div className="w-screen h-screen bg-neutral-100 flex justify-center items-center flex-col">
         {<h1 className="font-bold text-6xl m-5">Arabic Wordle</h1>}
