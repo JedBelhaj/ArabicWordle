@@ -7,13 +7,14 @@ function Row(props) {
 
   let states = [0, 0, 0, 0, 0];
   const charState = () => {
-    // 0 unsubmitted, 1 char doesnt exist, 2 char in incorrect place, 3 char in correct place
-    // return in this form [1, 1, 2, 3, 1]
-    tracks = {};
+    let goal_ = [...goal];
+    let word_ = [...word];
     for (let i = 0; i < WORD_LENGTH; i++) {
-      if (word[i] == goal[i]) {
+      if (word_[i] == goal_[i]) {
         states[i] = 3;
-      } else if (goal.indexOf(word[i]) === -1) {
+        goal_[i] = "_";
+        word_[i] = "_";
+      } else if (goal_.indexOf(word_[i]) === -1) {
         states[i] = 1;
       } else {
         states[i] = 2;
