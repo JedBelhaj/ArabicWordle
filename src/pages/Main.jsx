@@ -31,12 +31,12 @@ function Main() {
                 wordsRef.current = [...nextWords]
             }
             
-            if (e.key.length === 1){
+            if (e.key.length === 1 && wordsRef.current[handlerWordCount].length < WORD_LENGTH){
                 const char = e.key
                 const nextWord = wordsRef.current[handlerWordCount].concat(char)
                 updateWord(nextWord)
             }
-            else if (e.key === "Backspace") {
+            else if (e.key === "Backspace" && wordsRef.current[handlerWordCount].length > 0) {
                 const nextWord = wordsRef.current[handlerWordCount].substring(0, wordsRef.current[handlerWordCount].length - 1)
                 updateWord(nextWord)
             } else if (e.key === "Enter" && wordsRef.current[handlerWordCount].length === WORD_LENGTH) {
