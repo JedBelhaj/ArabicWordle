@@ -14,11 +14,18 @@ function Row(props) {
         states[i] = 3;
         goal_[i] = "_";
         word_[i] = "_";
-      } else if (goal_.indexOf(word_[i]) === -1) {
+      }
+      console.log("word :", word_, ", goal :", goal_);
+    }
+    for (let i = 0; i < WORD_LENGTH; i++) {
+      if (goal_.indexOf(word_[i]) === -1) {
         states[i] = 1;
-      } else {
+      } else if (word_[i] !== "_") {
+        goal_[goal_.indexOf(word_[i])] = "_";
+        word_[i] = "_";
         states[i] = 2;
       }
+      console.log("word :", word_, ", goal :", goal_);
       console.log(states);
     }
   };

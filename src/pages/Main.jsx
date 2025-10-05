@@ -13,7 +13,7 @@ function Main() {
   const wordCountRef = useRef(0);
   const [keyPressed, setKeyPressed] = useState(false);
 
-  const goal = "woody";
+  const goal = "oxoox";
 
   const arabicAlphabet = "Backspaceضصثقفغعهخحجدذشسيبلاتنمكطئءؤرلاىةوزظ";
 
