@@ -1,24 +1,28 @@
 import { useEffect, useRef, useState } from "react";
 import Row from "../components/Row";
 import WORD_LENGTH from "../constants";
+import EndGameScreen from "../components/EndGameScreen";
+import Grid from "../components/Grid";
+import Keyboard from "../components/Keyboard";
 
 function Main() {
-  const [tries, setTries] = useState(0);
   const [game, setGame] = useState(false);
-  const [key, setKey] = useState("");
-  const [charCount, setCharCount] = useState(0);
+  const [win, setWin] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [words, setWords] = useState(["", "", "", "", "", ""]);
-  const wordsRef = useRef(["", "", "", "", "", ""]);
-  const wordCountRef = useRef(0);
-  const [keyPressed, setKeyPressed] = useState(false);
+  let wordsRef = useRef(["", "", "", "", "", ""]);
+  let wordCountRef = useRef(0);
 
-  const goal = "oxoox";
+  const goal = "grave";
 
-  const arabicAlphabet = "Backspaceضصثقفغعهخحجدذشسيبلاتنمكطئءؤرلاىةوزظ";
+  const arabicAlphabet = "ضصثقفغعهخحجدذشسيبلاتنمكطئءؤرلاىةوزظأإ";
 
   useEffect(() => {
     const handleInput = (e) => {
+      if (game) {
+        document.removeEventListener("keyup", handleInput);
+        return;
+      }
       const handlerWordCount = wordCountRef.current;
       console.log("first word count:", handlerWordCount);
 
@@ -32,11 +36,11 @@ function Main() {
         setWords([...nextWords]);
         wordsRef.current = [...nextWords];
       };
-
       if (
         e.key.length === 1 &&
         wordsRef.current[handlerWordCount].length < WORD_LENGTH &&
-        e.key !== " "
+        e.key !== " " &&
+        e.key
       ) {
         const char = e.key;
         const nextWord = wordsRef.current[handlerWordCount].concat(char);
@@ -57,35 +61,41 @@ function Main() {
         wordCountRef.current++;
         setWordCount(wordCountRef.current);
         console.log("last word count:", handlerWordCount);
+        if (wordsRef.current[handlerWordCount] === goal) {
+          setGame(true);
+          setWin(true);
+        }
       }
     };
     document.addEventListener("keyup", handleInput);
     return () => document.removeEventListener("keyup", handleInput);
-  }, []);
+  }, [game]);
 
   useEffect(() => {
     console.log("registered words :", words);
   }, [words]);
 
   useEffect(() => {
-    if (tries == 4) {
+    if (wordCount == 6) {
       setGame(true);
     }
-  }, [tries]);
+  }, [wordCount]);
+
+  const resetGame = () => {
+    setGame(false);
+    setWin(false);
+    setWordCount(0);
+    setWords(["", "", "", "", "", ""]);
+    wordsRef.current = ["", "", "", "", "", ""];
+    wordCountRef.current = 0;
+  };
 
   return (
-    <div className="w-screen h-screen bg-neutral-100 flex justify-center items-center flex-col">
+    <div className="w-screen min-h-screen bg-neutral-100 flex justify-center items-center flex-col">
+      {game && <EndGameScreen reset={resetGame} win={win} goal={goal} />}
       {<h1 className="font-bold text-6xl m-5">Arabic Wordle !</h1>}
-      <div id="char-grid" className="flex flex-col gap-2">
-        {words.map((w, index) => (
-          <Row
-            word={w}
-            goal={goal}
-            key={index}
-            submitted={index < wordCount ? true : false}
-          />
-        ))}
-      </div>
+      <Grid words={words} wordCount={wordCount} goal={goal} />
+      <Keyboard words={words} goal={goal} wordCount={wordCount} />
     </div>
   );
 }
