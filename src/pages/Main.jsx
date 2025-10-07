@@ -4,6 +4,7 @@ import WORD_LENGTH from "../constants";
 import EndGameScreen from "../components/EndGameScreen";
 import Grid from "../components/Grid";
 import Keyboard from "../components/Keyboard";
+import { resetKeyboard } from "../utils";
 
 function Main() {
   const [game, setGame] = useState(false);
@@ -88,6 +89,7 @@ function Main() {
     setWords(["", "", "", "", "", ""]);
     wordsRef.current = ["", "", "", "", "", ""];
     wordCountRef.current = 0;
+    resetKeyboard();
   };
 
   return (

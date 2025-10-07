@@ -1,5 +1,6 @@
 import Box from "./Box";
 import WORD_LENGTH from "../constants.js";
+import { keyboardStates, setKeyboardStates } from "../utils.js";
 
 function Row(props) {
   const { word, goal, submitted } = props;
@@ -28,6 +29,7 @@ function Row(props) {
       console.log("word :", word_, ", goal :", goal_);
       console.log(states);
     }
+    setKeyboardStates(word, states);
   };
   if (submitted) {
     charState();
