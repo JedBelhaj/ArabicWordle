@@ -5,6 +5,7 @@ import EndGameScreen from "../components/EndGameScreen";
 import Grid from "../components/Grid";
 import Keyboard from "../components/Keyboard";
 import { resetKeyboard } from "../utils";
+import { alpha } from "../utils";
 
 function Main() {
   const [game, setGame] = useState(false);
@@ -25,15 +26,10 @@ function Main() {
         return;
       }
       const handlerWordCount = wordCountRef.current;
-      console.log("first word count:", handlerWordCount);
-
-      console.log("words in handleinput begin: ", words);
-      console.log("char", e.key);
 
       const updateWord = (nextWord) => {
         const nextWords = [...wordsRef.current];
         nextWords.splice(handlerWordCount, 1, nextWord);
-        console.log("next words:", nextWords);
         setWords([...nextWords]);
         wordsRef.current = [...nextWords];
       };
@@ -41,7 +37,7 @@ function Main() {
         e.key.length === 1 &&
         wordsRef.current[handlerWordCount].length < WORD_LENGTH &&
         e.key !== " " &&
-        e.key
+        alpha.indexOf(e.key) !== -1
       ) {
         const char = e.key;
         const nextWord = wordsRef.current[handlerWordCount].concat(char);
@@ -61,7 +57,6 @@ function Main() {
       ) {
         wordCountRef.current++;
         setWordCount(wordCountRef.current);
-        console.log("last word count:", handlerWordCount);
         if (wordsRef.current[handlerWordCount] === goal) {
           setGame(true);
           setWin(true);
@@ -71,10 +66,6 @@ function Main() {
     document.addEventListener("keyup", handleInput);
     return () => document.removeEventListener("keyup", handleInput);
   }, [game]);
-
-  useEffect(() => {
-    console.log("registered words :", words);
-  }, [words]);
 
   useEffect(() => {
     if (wordCount == 6) {
@@ -92,11 +83,19 @@ function Main() {
     resetKeyboard();
   };
 
+  const grid = <Grid words={words} wordCount={wordCount} goal={goal} />;
+
   return (
-    <div className="w-screen min-h-screen bg-neutral-100 flex justify-center items-center flex-col">
-      {game && <EndGameScreen reset={resetGame} win={win} goal={goal} />}
-      {<h1 className="font-bold text-6xl m-5">Arabic Wordle !</h1>}
-      <Grid words={words} wordCount={wordCount} goal={goal} />
+    <div className="dark:bg-neutral-900 w-screen min-h-screen bg-neutral-100 flex justify-center items-center flex-col">
+      {game && (
+        <EndGameScreen reset={resetGame} win={win} goal={goal} grid={grid} />
+      )}
+      {
+        <h1 className="dark:text-white font-bold text-6xl m-5">
+          Arabic Wordle !
+        </h1>
+      }
+      {grid}
       <Keyboard words={words} goal={goal} wordCount={wordCount} />
     </div>
   );
