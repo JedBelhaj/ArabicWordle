@@ -1,10 +1,10 @@
 export const getStateColor = (state) => {
   switch (state) {
     case 0:
-      return "bg-neutral-300";
+      return "bg-neutral-300 dark:bg-neutral-500";
       break;
     case 1:
-      return "bg-neutral-400";
+      return "bg-neutral-400 dark:bg-neutral-700";
       break;
     case 2:
       return "bg-yellow-400";
@@ -13,7 +13,7 @@ export const getStateColor = (state) => {
       return "bg-green-400";
       break;
     default:
-      return "bg-neutral-300";
+      return "bg-neutral-300 dark:bg-neutral-500";
       break;
   }
 };
