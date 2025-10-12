@@ -9,9 +9,7 @@ function Keyboard(props) {
 
   useEffect(() => {
     setStates(keyboardStates);
-    console.log(states);
   }, [wordCount]);
-  console.log(states);
 
   return (
     <div className="flex max-w-xl h-fit flex-wrap justify-center my-10">

@@ -4,7 +4,6 @@ import { keyboardStates, setKeyboardStates } from "../utils.js";
 
 function Row(props) {
   const { word, goal, submitted } = props;
-  console.log(props);
 
   let states = [0, 0, 0, 0, 0];
   const charState = () => {
@@ -16,7 +15,6 @@ function Row(props) {
         goal_[i] = "_";
         word_[i] = "_";
       }
-      console.log("word :", word_, ", goal :", goal_);
     }
     for (let i = 0; i < WORD_LENGTH; i++) {
       if (goal_.indexOf(word_[i]) === -1) {
@@ -26,8 +24,6 @@ function Row(props) {
         word_[i] = "_";
         states[i] = 2;
       }
-      console.log("word :", word_, ", goal :", goal_);
-      console.log(states);
     }
     setKeyboardStates(word, states);
   };
@@ -43,6 +39,7 @@ function Row(props) {
           <Box
             char={word.length >= i ? word.charAt(i) : ""}
             state={states[i]}
+            delay={i}
             key={i}
           />
         ))}
