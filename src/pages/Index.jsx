@@ -22,7 +22,7 @@ function Index() {
         </div>
       </div>
 
-      <RainDropEffect letterCount={30} />
+      <RainDropEffect letterCount={100} />
     </div>
   );
 }
