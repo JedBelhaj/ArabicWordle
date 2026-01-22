@@ -29,7 +29,7 @@ function Box(props) {
 
   return (
     <div
-      className={`-z-[0] box ${color} ${scale} transition-all duration-300 h-22 w-22 rounded-3xl flex items-center justify-center text-6xl uppercase font-bold`}
+      className={`-z-[0] box ${color} ${scale} transition-all duration-300 h-18 w-18 rounded-3xl flex items-center justify-center text-5xl uppercase font-bold`}
     >
       {char}
     </div>

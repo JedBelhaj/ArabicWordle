@@ -12,7 +12,7 @@ function Keyboard(props) {
   }, [wordCount]);
 
   return (
-    <div className="flex max-w-xl h-fit flex-wrap justify-center my-10">
+    <div className="flex max-w-md h-fit flex-wrap justify-center my-9">
       {[...alpha].map((char, i) => (
         <Key key={i} state={states[i]} char={char} />
       ))}
