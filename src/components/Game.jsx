@@ -111,6 +111,7 @@ function Game({ mode }) {
 
   return (
     <div
+      ref={containerRef}
       tabIndex={goal ? 0 : -1} // Only focusable if goal is set
       onFocus={() => {
         isFocusedRef.current = true;
@@ -123,11 +124,7 @@ function Game({ mode }) {
       {game && (
         <EndGameScreen reset={resetGame} win={win} goal={goal} grid={grid} />
       )}
-      {
-        <h1 className="dark:text-white font-bold text-6xl m-5">
-          The word is {goal}
-        </h1>
-      }
+      {<h1 className="dark:text-white font-bold text-6xl m-5">Wordle 😝</h1>}
       {grid}
       <Keyboard words={words} goal={goal} wordCount={wordCount} />
     </div>
