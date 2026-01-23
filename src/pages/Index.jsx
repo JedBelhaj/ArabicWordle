@@ -16,7 +16,7 @@ function Index() {
           >
             Single Player
           </button>
-          <button className="bg-yellow-400 p-4 rounded-2xl font-bold hover:scale-105 transition-all duration-300 cursor-pointer hover:bg-red-500">
+          <button onClick={() => navigate("/multiplayer")} className="bg-yellow-400 p-4 rounded-2xl font-bold hover:scale-105 transition-all duration-300 cursor-pointer hover:bg-red-500">
             Multiplayer
           </button>
         </div>

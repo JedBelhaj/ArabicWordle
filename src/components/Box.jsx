@@ -23,7 +23,7 @@ function Box(props) {
       () => {
         setColor(getStateColor(state));
       },
-      state === 0 ? 0 : delay * 50
+      state === 0 ? 0 : delay * 50,
     );
   });
 
