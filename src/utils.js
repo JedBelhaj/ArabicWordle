@@ -39,4 +39,11 @@ export const setKeyState = (key, state) => {
   }
 };
 
+export const isEnglishWord = (word) => {
+  const isEnglish = (text) => franc(text) === "eng";
+  console.log(isEnglish("hello world"));
+  alert(isEnglish(word));
+  return isEnglish(word);
+};
+
 export default { getStateColor, keyboardStates, alpha };

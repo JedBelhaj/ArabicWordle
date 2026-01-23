@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import Row from "../components/Row";
 import WORD_LENGTH from "../constants";
 import EndGameScreen from "../components/EndGameScreen";
 import Grid from "../components/Grid";
@@ -7,21 +6,40 @@ import Keyboard from "../components/Keyboard";
 import { resetKeyboard } from "../utils";
 import { alpha } from "../utils";
 
-function Game() {
+function Game({ mode }) {
   const [game, setGame] = useState(false);
   const [win, setWin] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [words, setWords] = useState(["", "", "", "", "", ""]);
+  const [goal, setGoal] = useState("");
 
   const isFocusedRef = useRef(false);
+  const containerRef = useRef(null);
   let wordsRef = useRef(["", "", "", "", "", ""]);
   let wordCountRef = useRef(0);
 
-  const goal = "grave";
+  useEffect(() => {
+    fetch("https://random-word-api.vercel.app/api?words=1&length=5")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setGoal(data[0]);
+        }
+      });
+  }, []);
+
+  // autofocus the game container once the goal word is ready
+  useEffect(() => {
+    if (goal && containerRef.current) {
+      containerRef.current.focus();
+      isFocusedRef.current = true;
+    }
+  }, [goal]);
 
   useEffect(() => {
     const handleInput = (e) => {
-      if (game) {
+      // Only allow input if goal is set and game is not over
+      if (!goal || game) {
         document.removeEventListener("keyup", handleInput);
         return;
       }
@@ -57,9 +75,13 @@ function Game() {
         e.key === "Enter" &&
         wordsRef.current[handlerWordCount].length === WORD_LENGTH
       ) {
+        const currentWord = wordsRef.current[handlerWordCount];
+        // Increment wordCount first so Grid knows to color this row
         wordCountRef.current++;
         setWordCount(wordCountRef.current);
-        if (wordsRef.current[handlerWordCount] === goal) {
+
+        // Then check if it's a winning guess
+        if (currentWord === goal) {
           setGame(true);
           setWin(true);
         }
@@ -67,7 +89,7 @@ function Game() {
     };
     document.addEventListener("keyup", handleInput);
     return () => document.removeEventListener("keyup", handleInput);
-  }, [game]);
+  }, [game, goal]);
 
   useEffect(() => {
     if (wordCount == 6) {
@@ -89,7 +111,7 @@ function Game() {
 
   return (
     <div
-      tabIndex={0} // Makes the div focusable
+      tabIndex={goal ? 0 : -1} // Only focusable if goal is set
       onFocus={() => {
         isFocusedRef.current = true;
       }}
@@ -103,7 +125,7 @@ function Game() {
       )}
       {
         <h1 className="dark:text-white font-bold text-6xl m-5">
-          Arabic Wordle !
+          The word is {goal}
         </h1>
       }
       {grid}
