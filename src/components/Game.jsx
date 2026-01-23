@@ -12,7 +12,6 @@ function Game() {
   const [win, setWin] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [words, setWords] = useState(["", "", "", "", "", ""]);
-  const [isFocused, setIsFocused] = useState(false);
 
   const isFocusedRef = useRef(false);
   let wordsRef = useRef(["", "", "", "", "", ""]);
@@ -92,11 +91,9 @@ function Game() {
     <div
       tabIndex={0} // Makes the div focusable
       onFocus={() => {
-        setIsFocused(true);
         isFocusedRef.current = true;
       }}
       onBlur={() => {
-        setIsFocused(false);
         isFocusedRef.current = false;
       }}
       className={`w-full flex flex-col items-center justify-center min-h-screen p-4`}
