@@ -105,6 +105,18 @@ function Game({ mode }) {
     wordsRef.current = ["", "", "", "", "", ""];
     wordCountRef.current = 0;
     resetKeyboard();
+    // clear current goal and fetch a new one
+    setGoal("");
+    fetch("https://random-word-api.vercel.app/api?words=1&length=5")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setGoal(data[0]);
+        }
+      })
+      .catch(() => {
+        // keep goal empty on error; UI will stay unfocusable
+      });
   };
 
   const grid = <Grid words={words} wordCount={wordCount} goal={goal} />;
