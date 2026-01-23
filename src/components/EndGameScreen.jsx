@@ -11,7 +11,7 @@ function EndGameScreen(props) {
 
   return (
     <div
-      className={`z-50 p-5 dark:text-white transition-all ${opacity} duration-300 absolute w-screen h-full bg-black/20 backdrop-blur-xs flex items-center justify-center`}
+      className={`z-50 p-5 dark:text-white transition-all ${opacity} duration-300 absolute h-full w-3/4 bg-black/20 backdrop-blur-xs flex items-center justify-center`}
     >
       <div className="min-w-xl min-h-60 dark:bg-neutral-800 bg-neutral-50 rounded-4xl flex items-center justify-center flex-col">
         <h1 className=" font-bold text-6xl m-5 text-center">

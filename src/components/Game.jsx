@@ -12,12 +12,13 @@ function Game() {
   const [win, setWin] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [words, setWords] = useState(["", "", "", "", "", ""]);
+  const [isFocused, setIsFocused] = useState(false);
+
+  const isFocusedRef = useRef(false);
   let wordsRef = useRef(["", "", "", "", "", ""]);
   let wordCountRef = useRef(0);
 
   const goal = "grave";
-
-  const arabicAlphabet = "ضصثقفغعهخحجدذشسيبلاتنمكطئءؤرلاىةوزظأإ";
 
   useEffect(() => {
     const handleInput = (e) => {
@@ -25,6 +26,8 @@ function Game() {
         document.removeEventListener("keyup", handleInput);
         return;
       }
+      if (!isFocusedRef.current) return;
+
       const handlerWordCount = wordCountRef.current;
 
       const updateWord = (nextWord) => {
@@ -86,7 +89,18 @@ function Game() {
   const grid = <Grid words={words} wordCount={wordCount} goal={goal} />;
 
   return (
-    <>
+    <div
+      tabIndex={0} // Makes the div focusable
+      onFocus={() => {
+        setIsFocused(true);
+        isFocusedRef.current = true;
+      }}
+      onBlur={() => {
+        setIsFocused(false);
+        isFocusedRef.current = false;
+      }}
+      className={`w-full flex flex-col items-center justify-center min-h-screen p-4`}
+    >
       {game && (
         <EndGameScreen reset={resetGame} win={win} goal={goal} grid={grid} />
       )}
@@ -97,7 +111,7 @@ function Game() {
       }
       {grid}
       <Keyboard words={words} goal={goal} wordCount={wordCount} />
-    </>
+    </div>
   );
 }
 
