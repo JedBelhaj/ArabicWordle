@@ -1,6 +1,7 @@
-import React from "react";
+import { useParams } from "react-router";
 
 function WaitingRoom() {
+  const roomId = useParams().roomId;
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b ">
       <div className="w-full max-w-4xl bg-gray-800/60 backdrop-blur-md border border-gray-700 rounded-2xl shadow-xl overflow-hidden">
@@ -15,10 +16,10 @@ function WaitingRoom() {
             </p>
           </div>
           <div className="flex items-center space-x-3">
-            <button className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md text-sm border border-gray-600">
-              Copy invite
+            <button className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md text-sm border border-gray-600">
+              Room Id : {roomId}
             </button>
-            <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md text-sm shadow">
+            <button className="cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md text-sm shadow">
               Start game
             </button>
           </div>

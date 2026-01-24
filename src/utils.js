@@ -1,14 +1,4 @@
-import { io } from "socket.io-client";
-
-const socket = io("http://localhost:8000", {
-  autoConnect: true,
-  transports: ["websocket", "polling"],
-});
-
-socket.emit("test", { data: "Hello from client!" });
-socket.on("testResponse", (data) => {
-  console.log("Received from server:", data);
-});
+import { socket } from "./socket";
 
 console.log(socket);
 
@@ -60,4 +50,4 @@ export const isEnglishWord = (word) => {
   return isEnglish(word);
 };
 
-export default { getStateColor, keyboardStates, alpha, socket };
+export default { getStateColor, keyboardStates, alpha };

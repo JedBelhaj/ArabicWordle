@@ -2,6 +2,7 @@ import Chat from "../components/Chat";
 import Game from "../components/Game";
 import WaitingRoom from "../components/WaitingRoom";
 import Players from "../components/Players";
+
 function Multiplayer() {
   const waiting = true;
   return (
