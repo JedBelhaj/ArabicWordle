@@ -8,4 +8,21 @@ add timer?
 
 ON MULTIPLAYER:
 
-design page done
+page for waiting and game settings
+
+backend socketio
+msgs:
+
+room management:
+create
+join
+start
+leave
+
+game management:
+start round
+next round
+send update
+recieve update
+send message
+recieve message
