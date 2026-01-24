@@ -1,3 +1,17 @@
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:8000", {
+  autoConnect: true,
+  transports: ["websocket", "polling"],
+});
+
+socket.emit("test", { data: "Hello from client!" });
+socket.on("testResponse", (data) => {
+  console.log("Received from server:", data);
+});
+
+console.log(socket);
+
 export const getStateColor = (state) => {
   switch (state) {
     case 0:
@@ -46,4 +60,4 @@ export const isEnglishWord = (word) => {
   return isEnglish(word);
 };
 
-export default { getStateColor, keyboardStates, alpha };
+export default { getStateColor, keyboardStates, alpha, socket };
