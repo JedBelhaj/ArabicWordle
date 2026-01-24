@@ -1,21 +1,34 @@
 import { useNavigate } from "react-router";
 import RainDropEffect from "../components/effects/RainDropEffect";
-import { socket } from "../socket";
+import { getSessionId, socket } from "../socket";
 import { useEffect, useState } from "react";
 function Index() {
   const [name, setName] = useState("");
+  const [sessionId, setSessionId] = useState(getSessionId());
   const navigate = useNavigate();
 
   useEffect(() => {
-    socket.on("room:created", ({ roomId, sessionId }) => {
-      localStorage.setItem("sessionId", sessionId);
-      console.log("Room created with ID:", roomId);
-      navigate(`/multiplayer/${roomId}`);
-    });
-  }, []);
+    setSessionId(getSessionId());
+  }, [getSessionId()]);
+
+  // useEffect(() => {
+  //   socket.on("room:created", ({ roomId, sessionId }) => {
+  //     localStorage.setItem("sessionId", sessionId);
+  //     console.log("Room created with ID:", roomId);
+  //     navigate(`/multiplayer/${roomId}`);
+  //   });
+  // }, []);
 
   const handleMultiplayerClick = () => {
-    socket.emit("room:create", name || "Guest");
+    socket.emit(
+      "room:create",
+      { username: name || "Guest" },
+      ({ roomId, sessionId }) => {
+        localStorage.setItem("sessionId", sessionId);
+        console.log("Room created with ID:", roomId);
+        navigate(`/multiplayer/${roomId}`);
+      },
+    );
   };
 
   return (
@@ -24,6 +37,7 @@ function Index() {
         <h1 className="text-white text-5xl font-bold">
           Welcome to Wordle Multiplayer!
         </h1>
+        <p>{getSessionId()}</p>
         <input
           type="text"
           placeholder="Enter your name"

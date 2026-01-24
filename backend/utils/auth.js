@@ -2,11 +2,10 @@ const crypto = require("crypto");
 
 const sessions = {};
 
-/** @type {(username: string, socketId: string, timeout: Object, data: Object) => string} */
-const createSession = (username, socketId) => {
+/** @type {(socketId: string, timeout: Object, data: Object) => string} */
+const createSession = (socketId) => {
   const sessionId = crypto.randomUUID();
   sessions[sessionId] = {
-    username,
     socketId,
     timeout: null,
     data: {},
@@ -40,6 +39,30 @@ const reviveSession = (sessionId, socketId) => {
   return true;
 };
 
+const handleAuth = (socket) => {
+  const sessionId = socket.handshake.auth?.sessionId;
+  console.log("old session id", sessionId);
+
+  if (sessionId && reviveSession(sessionId, socket.id)) {
+    socket.sessionId = sessionId;
+    console.log(`Session ${sessionId} revived for socket ${socket.id}`);
+  } else {
+    const newSessionId = createSession(socket.id);
+    socket.sessionId = newSessionId;
+    socket.emit("sessionCreated", { sessionId: newSessionId });
+    console.log(`New session ${newSessionId} created for socket ${socket.id}`);
+  }
+};
+
+const addDataToSession = (sessionId, data) => {
+  if (sessions[sessionId]) {
+    sessions[sessionId].data = {
+      ...sessions[sessionId].data,
+      ...data,
+    };
+  }
+};
+
 module.exports = {
   sessions,
   createSession,
@@ -47,4 +70,6 @@ module.exports = {
   deleteSession,
   startDisconnectTimeout,
   reviveSession,
+  handleAuth,
+  addDataToSession,
 };

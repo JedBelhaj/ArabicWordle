@@ -2,6 +2,7 @@ const { Server } = require("socket.io");
 const http = require("http");
 const express = require("express");
 const { handleSocketEvents } = require("./utils/socketHandlers");
+const { handleAuth } = require("./utils/auth");
 
 const app = express();
 const server = http.createServer(app);
@@ -13,7 +14,7 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("Client connected:", socket.id);
+  handleAuth(socket);
   handleSocketEvents(io, socket);
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);

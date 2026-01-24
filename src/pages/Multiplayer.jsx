@@ -2,8 +2,24 @@ import Chat from "../components/Chat";
 import Game from "../components/Game";
 import WaitingRoom from "../components/WaitingRoom";
 import Players from "../components/Players";
+import { useEffect, useState } from "react";
+import { socket } from "../socket";
+import { useParams } from "react-router";
 
 function Multiplayer() {
+  const roomId = useParams().roomId;
+  const [roomDetails, setRoomDetails] = useState(null);
+  useEffect(() => {
+    socket.emit("room:details", { roomId }, (res) => {
+      if (res.success) {
+        setRoomDetails(res.room);
+      } else {
+        console.error("Failed to fetch room details");
+      }
+    });
+  }, []);
+  console.log(roomDetails);
+
   const waiting = true;
   return (
     <div className="dark:bg-neutral-900 w-screen min-h-screen bg-neutral-100 flex">

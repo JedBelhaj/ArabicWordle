@@ -1,6 +1,15 @@
 const { time } = require("console");
 const { randomUUID } = require("crypto");
-const rooms = {};
+const rooms = {
+  fuck: {
+    players: [],
+    settings: {},
+    timeout: null,
+    data: {
+      test: "FUCK ROOM DATA IS BEING COLLECTED",
+    },
+  },
+};
 
 /** @type {(playerIds: Array, settings: Object, timeout: Object, data: Object) => string} */
 
@@ -15,4 +24,8 @@ const createRoom = (sessionId) => {
   };
   return roomId;
 };
-module.exports = { createRoom, rooms };
+
+const getRoomDetails = (roomId) => {
+  return rooms[roomId];
+};
+module.exports = { createRoom, rooms, getRoomDetails };
