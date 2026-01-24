@@ -9,6 +9,11 @@ function Index() {
         <h1 className="text-white text-5xl font-bold">
           Welcome to Wordle Multiplayer!
         </h1>
+        <input
+          type="text"
+          placeholder="Enter your name"
+          className="mt-5 p-3 rounded-lg bg-slate-900 text-white font-semibold placeholder:font-normal placeholder:text-gray-500"
+        />
         <div className="m-10 gap-5 flex">
           <button
             onClick={() => navigate("/singleplayer")}
@@ -16,7 +21,10 @@ function Index() {
           >
             Single Player
           </button>
-          <button onClick={() => navigate("/multiplayer")} className="bg-yellow-400 p-4 rounded-2xl font-bold hover:scale-105 transition-all duration-300 cursor-pointer hover:bg-red-500">
+          <button
+            onClick={() => navigate("/multiplayer")}
+            className="bg-yellow-400 p-4 rounded-2xl font-bold hover:scale-105 transition-all duration-300 cursor-pointer hover:bg-red-500"
+          >
             Multiplayer
           </button>
         </div>
