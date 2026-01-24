@@ -25,7 +25,7 @@ function Multiplayer() {
     <div className="dark:bg-neutral-900 w-screen min-h-screen bg-neutral-100 flex">
       {/* Board Section */}
       <div className="w-3/4 h-screen bg-neutral-800 flex items-center justify-center flex-col">
-        {waiting ? <WaitingRoom /> : <Game />}
+        {waiting ? <WaitingRoom roomDetails={roomDetails} /> : <Game />}
       </div>
       {/* /* Players & Chat Section */}
       <div className="w-1/4 h-screen border-l border-neutral-700">

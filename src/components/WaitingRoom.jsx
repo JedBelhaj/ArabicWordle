@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 
-function WaitingRoom() {
+function WaitingRoom({ roomDetails }) {
   const roomId = useParams().roomId;
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b ">
@@ -12,7 +12,10 @@ function WaitingRoom() {
             </h1>
             <p className="text-gray-400 text-sm mt-1">
               Players joined:{" "}
-              <span className="text-indigo-300 font-medium">1</span> / 6
+              <span className="text-indigo-300 font-medium">
+                {roomDetails?.players.length || 0}
+              </span>{" "}
+              / 6
             </p>
           </div>
           <div className="flex items-center space-x-3">
@@ -189,15 +192,20 @@ function WaitingRoom() {
             <div>
               <h3 className="text-white font-medium mb-2">Players</h3>
               <ul className="text-sm text-gray-300 space-y-2">
-                <li className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-medium">
-                      J
-                    </span>
-                    <span>Jed (host)</span>
-                  </div>
-                  <span className="text-xs text-green-400">Ready</span>
-                </li>
+                {roomDetails?.players.map((player, index) => (
+                  <li key={index} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-medium">
+                        {player.username.charAt(0).toUpperCase()}
+                      </span>
+                      <span>
+                        {player.username}
+                        {index === 0 ? " (host)" : ""}
+                      </span>
+                    </div>
+                    <span className="text-xs text-green-400">Ready</span>
+                  </li>
+                ))}
                 <li className="flex items-center justify-between text-gray-500">
                   <div className="flex items-center gap-3">
                     <span className="h-8 w-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-medium">
