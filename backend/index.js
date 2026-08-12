@@ -2,25 +2,31 @@ const { Server } = require("socket.io");
 const http = require("http");
 const express = require("express");
 const { handleSocketEvents } = require("./utils/socketHandlers");
-const { handleAuth } = require("./utils/auth");
+const { handleAuth, getSession } = require("./utils/auth");
+
+const PORT = process.env.PORT || 8000;
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 
 const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: CORS_ORIGIN,
   },
 });
 
 io.on("connection", (socket) => {
   handleAuth(socket);
+
+  // Rejoin the Socket.IO room on reconnect (e.g. page refresh mid-game) —
+  // room membership above is per-connection, not persisted across sockets.
+  const roomId = getSession(socket.sessionId)?.data?.roomId;
+  if (roomId) socket.join(roomId);
+
   handleSocketEvents(io, socket);
-  socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
-  });
 });
 
-server.listen(8000, () => {
-  console.log("Socket.IO running on port 8000");
+server.listen(PORT, () => {
+  console.log(`Socket.IO running on port ${PORT}`);
 });

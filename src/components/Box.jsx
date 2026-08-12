@@ -15,10 +15,6 @@ function Box(props) {
   }, [char]);
 
   useEffect(() => {
-    console.log(scale);
-  }, [scale]);
-
-  useEffect(() => {
     setTimeout(
       () => {
         setColor(getStateColor(state));

@@ -1,21 +1,29 @@
-import { useEffect, useState } from "react";
 import Key from "./Key";
-import { alpha, keyboardStates } from "../utils";
 
-function Keyboard(props) {
-  const { words, goal, wordCount } = props;
-
-  const [states, setStates] = useState(keyboardStates);
-
-  useEffect(() => {
-    setStates(keyboardStates);
-  }, [wordCount]);
-
+function Keyboard({ alphabet, states, onChar, onBackspace, onEnter, backspaceLabel, enterLabel }) {
   return (
-    <div className="flex max-w-md h-fit flex-wrap justify-center my-9">
-      {[...alpha].map((char, i) => (
-        <Key key={i} state={states[i]} char={char} />
-      ))}
+    <div className="flex flex-col items-center gap-2 my-9">
+      <div className="flex max-w-2xl flex-wrap justify-center">
+        {alphabet.map((char, i) => (
+          <Key key={char} state={states[i] ?? 0} char={char} onClick={() => onChar(char)} />
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onBackspace}
+          className="px-4 py-2 bg-neutral-500 hover:brightness-110 active:scale-95 transition rounded-lg font-semibold text-white cursor-pointer"
+        >
+          {backspaceLabel}
+        </button>
+        <button
+          type="button"
+          onClick={onEnter}
+          className="px-4 py-2 bg-neutral-500 hover:brightness-110 active:scale-95 transition rounded-lg font-semibold text-white cursor-pointer"
+        >
+          {enterLabel}
+        </button>
+      </div>
     </div>
   );
 }

@@ -6,8 +6,7 @@ function EndGameScreen(props) {
     setOpacity("opacity-100");
   }, 200);
 
-  const { win, reset, goal, grid } = props;
-  console.log(grid);
+  const { win, reset, goal, grid, strings } = props;
 
   return (
     <div
@@ -15,16 +14,16 @@ function EndGameScreen(props) {
     >
       <div className="min-w-xl min-h-60 dark:bg-neutral-800 bg-neutral-50 rounded-4xl flex items-center justify-center flex-col">
         <h1 className=" font-bold text-6xl m-5 text-center">
-          You {win ? "win! 🎉" : "lost! ☹️"}
+          {win ? strings.win : strings.lose}
         </h1>
-        <h1 className="text-2xl">{"the word was " + goal}</h1>
+        <h1 className="text-2xl">{strings.wordWas + goal}</h1>
         <div className="scale-75 -m-10 text-black">{grid}</div>
         <div>
           <button
             onClick={reset}
             className="bg-green-600 px-6 py-3 mb-8 rounded-2xl text-white hover:cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out"
           >
-            Restart
+            {strings.restart}
           </button>
         </div>
       </div>
