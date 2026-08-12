@@ -17,13 +17,14 @@ const englishBank = require(path.join(
   "english.json",
 ));
 
+// { arabic: { guesses: {3,4,5}, answers: {3,4,5} }, english: { ... } }
 const BANKS = { arabic: arabicBank, english: englishBank };
 
-const SETS = Object.fromEntries(
+const GUESS_SETS = Object.fromEntries(
   Object.entries(BANKS).map(([lang, bank]) => [
     lang,
     Object.fromEntries(
-      Object.entries(bank).map(([len, words]) => [len, new Set(words)]),
+      Object.entries(bank.guesses).map(([len, words]) => [len, new Set(words)]),
     ),
   ]),
 );
@@ -36,13 +37,13 @@ function normalize(language, word) {
 }
 
 function getRandomWord(language, length) {
-  const words = BANKS[language]?.[String(length)];
+  const words = BANKS[language]?.answers?.[String(length)];
   if (!words || words.length === 0) return null;
   return words[Math.floor(Math.random() * words.length)];
 }
 
 function isValidWord(language, length, word) {
-  const words = SETS[language]?.[String(length)];
+  const words = GUESS_SETS[language]?.[String(length)];
   if (!words) return false;
   return words.has(normalize(language, word));
 }

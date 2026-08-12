@@ -7,9 +7,9 @@ const ARABIC_CANONICAL_ORDER = [
   "ن", "ه", "و", "ى", "ي", "ة",
 ];
 
-function buildAlphabet(bank, canonicalOrder) {
+function buildAlphabet(guessBank, canonicalOrder) {
   const used = new Set();
-  for (const words of Object.values(bank)) {
+  for (const words of Object.values(guessBank)) {
     for (const word of words) {
       for (const ch of word) used.add(ch);
     }
@@ -19,13 +19,14 @@ function buildAlphabet(bank, canonicalOrder) {
   return [...ordered, ...leftover];
 }
 
+// { arabic: { guesses: {3,4,5}, answers: {3,4,5} }, english: { ... } }
 const BANKS = { arabic: arabicBank, english: englishBank };
 
-const SETS = Object.fromEntries(
+const GUESS_SETS = Object.fromEntries(
   Object.entries(BANKS).map(([lang, bank]) => [
     lang,
     Object.fromEntries(
-      Object.entries(bank).map(([len, words]) => [len, new Set(words)]),
+      Object.entries(bank.guesses).map(([len, words]) => [len, new Set(words)]),
     ),
   ]),
 );
@@ -34,7 +35,7 @@ export const LANGUAGES = {
   arabic: {
     label: "العربية",
     dir: "rtl",
-    alphabet: buildAlphabet(arabicBank, ARABIC_CANONICAL_ORDER),
+    alphabet: buildAlphabet(arabicBank.guesses, ARABIC_CANONICAL_ORDER),
   },
   english: {
     label: "English",
@@ -50,13 +51,13 @@ export function normalize(language, word) {
 }
 
 export function getRandomWord(language, length) {
-  const words = BANKS[language]?.[String(length)];
+  const words = BANKS[language]?.answers?.[String(length)];
   if (!words || words.length === 0) return null;
   return words[Math.floor(Math.random() * words.length)];
 }
 
 export function isValidWord(language, length, word) {
-  const words = SETS[language]?.[String(length)];
+  const words = GUESS_SETS[language]?.[String(length)];
   if (!words) return false;
   return words.has(normalize(language, word));
 }
