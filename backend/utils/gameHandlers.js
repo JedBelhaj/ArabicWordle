@@ -85,10 +85,29 @@ function submitGuess(io, roomId, sessionId, rawGuess) {
     lastStates: states,
   });
 
-  const allFinished = room.players.every((id) => room.game.playerStates[id]?.finished);
-  if (allFinished) endRound(io, roomId);
+  checkRoundCompletion(io, roomId);
 
   return { valid: true, states, correct };
+}
+
+// Ends the round early once every remaining player has finished — called
+// after a guess, and after a player leaves mid-round (their departure can
+// itself complete the round for whoever's left).
+function checkRoundCompletion(io, roomId) {
+  const room = getRoomDetails(roomId);
+  if (!room || room.status !== "playing" || !room.game) return;
+  if (room.players.length === 0) return;
+  const allFinished = room.players.every((id) => room.game.playerStates[id]?.finished);
+  if (allFinished) endRound(io, roomId);
+}
+
+// Strips a departed player out of the in-progress game so they stop
+// showing up in the live sidebar and the scoreboard.
+function removePlayerFromGame(roomId, sessionId) {
+  const room = getRoomDetails(roomId);
+  if (!room || !room.game) return;
+  delete room.game.playerStates?.[sessionId];
+  delete room.game.scores?.[sessionId];
 }
 
 function computeRoundScores(room) {
@@ -128,13 +147,15 @@ function endRound(io, roomId) {
     roundPoints: roundScores[id] ?? 0,
   }));
 
-  io.to(roomId).emit("game:roundEnd", {
+  const roundEndPayload = {
     goal: room.game.goal,
     results,
     scores: room.game.scores,
     roundIndex: room.game.roundIndex,
     totalRounds: room.settings.rounds,
-  });
+  };
+  room.lastRoundEnd = roundEndPayload;
+  io.to(roomId).emit("game:roundEnd", roundEndPayload);
 
   const isFinalRound = room.game.roundIndex >= room.settings.rounds;
   room.game.nextRoundTimer = setTimeout(() => {
@@ -142,11 +163,65 @@ function endRound(io, roomId) {
     if (current?.status !== "roundEnd") return;
     if (isFinalRound) {
       current.status = "gameEnd";
-      io.to(roomId).emit("game:over", { scores: current.game.scores });
+      const gameOverPayload = { scores: current.game.scores };
+      current.lastGameOver = gameOverPayload;
+      io.to(roomId).emit("game:over", gameOverPayload);
     } else {
       startRound(io, roomId);
     }
   }, ROUND_END_DELAY_MS);
 }
 
-module.exports = { startGame, startRound, submitGuess, endRound };
+// Rebuilds everything a client needs to resume mid-game after a reconnect
+// (page refresh) — the round's public config, every player's progress for
+// the sidebar, this player's own guesses, and the last round-end/game-over
+// payload in case they reconnect during one of those screens.
+function getRoundRehydration(roomId, sessionId) {
+  const room = getRoomDetails(roomId);
+  if (!room || !room.game) return {};
+
+  const rehydration = {
+    round: {
+      roundIndex: room.game.roundIndex,
+      totalRounds: room.settings.rounds,
+      wordLength: room.settings.wordLength,
+      tries: room.settings.tries,
+      timeLimit: room.settings.timeLimit,
+      language: room.settings.language,
+      startedAt: room.game.startedAt,
+    },
+    progress: Object.fromEntries(
+      room.players.map((id) => {
+        const state = room.game.playerStates?.[id];
+        return [
+          id,
+          {
+            sessionId: id,
+            triesUsed: state?.guesses.length ?? 0,
+            finished: state?.finished ?? false,
+            won: state?.won ?? false,
+            history: (state?.guesses ?? []).map((g) => g.states),
+          },
+        ];
+      }),
+    ),
+    myGuesses: room.game.playerStates?.[sessionId]?.guesses ?? [],
+    myFinished: room.game.playerStates?.[sessionId]?.finished ?? false,
+    myWon: room.game.playerStates?.[sessionId]?.won ?? false,
+  };
+
+  if (room.lastRoundEnd) rehydration.roundEndInfo = room.lastRoundEnd;
+  if (room.lastGameOver) rehydration.gameOverInfo = room.lastGameOver;
+
+  return rehydration;
+}
+
+module.exports = {
+  startGame,
+  startRound,
+  submitGuess,
+  endRound,
+  getRoundRehydration,
+  checkRoundCompletion,
+  removePlayerFromGame,
+};

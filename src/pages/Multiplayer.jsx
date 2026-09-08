@@ -16,23 +16,36 @@ function Multiplayer() {
   const [phase, setPhase] = useState("loading"); // loading | error | lobby | playing | roundEnd | gameEnd
   const [players, setPlayers] = useState([]);
   const [settings, setSettings] = useState(null);
-  const [hostSessionId, setHostSessionId] = useState(null);
   const [roundInfo, setRoundInfo] = useState(null);
   const [roundEndInfo, setRoundEndInfo] = useState(null);
   const [gameOverInfo, setGameOverInfo] = useState(null);
   const [progress, setProgress] = useState({});
   const [messages, setMessages] = useState([]);
+  const [myGuesses, setMyGuesses] = useState([]);
+  const [myFinished, setMyFinished] = useState(false);
+  const [myWon, setMyWon] = useState(false);
 
   useEffect(() => {
     socket.emit("room:details", { roomId }, (res) => {
-      if (res.success) {
-        setPlayers(res.room.players);
-        setSettings(res.room.settings);
-        setHostSessionId(res.room.hostSessionId);
-        setPhase(res.room.status);
-      } else {
+      if (!res.success) {
         setPhase("error");
+        return;
       }
+      const room = res.room;
+      setPlayers(room.players);
+      setSettings(room.settings);
+
+      // Rehydrate mid-game state on (re)connect — e.g. after a page refresh —
+      // so we land back on the right screen instead of a blank board.
+      if (room.round) setRoundInfo(room.round);
+      if (room.progress) setProgress(room.progress);
+      if (room.myGuesses) setMyGuesses(room.myGuesses);
+      setMyFinished(room.myFinished ?? false);
+      setMyWon(room.myWon ?? false);
+      if (room.roundEndInfo) setRoundEndInfo(room.roundEndInfo);
+      if (room.gameOverInfo) setGameOverInfo(room.gameOverInfo);
+
+      setPhase(room.status);
     });
 
     const onRoomUpdate = ({ players }) => setPlayers(players);
@@ -41,6 +54,9 @@ function Multiplayer() {
       setRoundInfo(info);
       setRoundEndInfo(null);
       setProgress({});
+      setMyGuesses([]);
+      setMyFinished(false);
+      setMyWon(false);
       setPhase("playing");
     };
     const onProgress = (payload) => {
@@ -99,7 +115,10 @@ function Multiplayer() {
       socket.emit("game:guess", { roomId, guess }, resolve);
     });
 
-  const isHost = sessionId && sessionId === hostSessionId;
+  // Derived from the live players list (not a separately-tracked host id) so
+  // a host promotion — e.g. the previous host leaving — takes effect the
+  // moment room:update arrives, instead of waiting for a page refresh.
+  const isHost = players.find((p) => p.sessionId === sessionId)?.isHost ?? false;
 
   let boardContent = null;
   if (phase === "loading") {
@@ -136,9 +155,13 @@ function Multiplayer() {
           wordLength: roundInfo.wordLength,
           tries: roundInfo.tries,
           timeLimit: roundInfo.timeLimit,
+          startedAt: roundInfo.startedAt,
           roundIndex: roundInfo.roundIndex,
           totalRounds: roundInfo.totalRounds,
           onGuess: handleGuess,
+          initialGuesses: myGuesses,
+          initialFinished: myFinished,
+          initialWon: myWon,
         }}
       />
     );

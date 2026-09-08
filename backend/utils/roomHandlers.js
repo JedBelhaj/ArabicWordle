@@ -49,6 +49,8 @@ const removePlayer = (roomId, sessionId) => {
   room.players = room.players.filter((id) => id !== sessionId);
 
   if (room.players.length === 0) {
+    clearTimeout(room.game?.timer);
+    clearTimeout(room.game?.nextRoundTimer);
     delete rooms[roomId];
     return;
   }

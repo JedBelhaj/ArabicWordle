@@ -8,9 +8,31 @@ const {
   isHost,
   updateSettings,
 } = require("./roomHandlers.js");
-const { startGame, submitGuess } = require("./gameHandlers.js");
+const {
+  startGame,
+  submitGuess,
+  getRoundRehydration,
+  checkRoundCompletion,
+  removePlayerFromGame,
+} = require("./gameHandlers.js");
 
 const DISCONNECT_ROOM_GRACE_MS = 5000;
+
+// Shared by an explicit "leave room" click and a disconnect that never
+// reconnects: drops the player from the room and its in-progress game (if
+// any), clears the room pointer off their session so a future reconnect
+// doesn't silently rejoin a room they already left, and lets the round end
+// early if they were the only one still playing.
+function leaveRoom(io, roomId, sessionId) {
+  removePlayer(roomId, sessionId);
+  removePlayerFromGame(roomId, sessionId);
+  addDataToSession(sessionId, { roomId: null });
+
+  const room = getRoomDetails(roomId);
+  if (!room) return;
+  io.to(roomId).emit("room:update", { players: getPlayersInfo(roomId) });
+  checkRoundCompletion(io, roomId);
+}
 
 const handleSocketEvents = (io, socket) => {
   socket.on("room:create", ({ username }, ack) => {
@@ -41,6 +63,7 @@ const handleSocketEvents = (io, socket) => {
       ack({ success: false, message: "Room not found" });
       return;
     }
+    const rehydration = room.status !== "lobby" ? getRoundRehydration(roomId, socket.sessionId) : {};
     ack({
       success: true,
       room: {
@@ -48,6 +71,7 @@ const handleSocketEvents = (io, socket) => {
         settings: room.settings,
         status: room.status,
         hostSessionId: room.data.host,
+        ...rehydration,
       },
     });
   });
@@ -91,9 +115,7 @@ const handleSocketEvents = (io, socket) => {
 
   socket.on("room:leave", ({ roomId }) => {
     socket.leave(roomId);
-    removePlayer(roomId, socket.sessionId);
-    const room = getRoomDetails(roomId);
-    if (room) io.to(roomId).emit("room:update", { players: getPlayersInfo(roomId) });
+    leaveRoom(io, roomId, socket.sessionId);
   });
 
   socket.on("disconnect", () => {
@@ -107,9 +129,7 @@ const handleSocketEvents = (io, socket) => {
       const current = getSession(sessionId);
       // Only drop them from the room if they never reconnected with a new socket.
       if (current && current.socketId === socket.id) {
-        removePlayer(roomId, sessionId);
-        const room = getRoomDetails(roomId);
-        if (room) io.to(roomId).emit("room:update", { players: getPlayersInfo(roomId) });
+        leaveRoom(io, roomId, sessionId);
       }
     }, DISCONNECT_ROOM_GRACE_MS);
   });

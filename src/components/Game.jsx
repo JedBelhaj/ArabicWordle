@@ -53,24 +53,78 @@ function Game({ multiplayer }) {
   const strings = STRINGS[language];
   const alphabet = LANGUAGES[language].alphabet;
 
-  const makeEmptyGuesses = () => Array(tries).fill("");
-  const makeEmptyResults = () => Array(tries).fill(null);
+  // Resuming a round after a reconnect (e.g. page refresh) means the server
+  // hands back this player's guesses so far — prefill the board with them
+  // instead of starting from a blank round the player already made progress in.
+  const initialGuesses = multiplayer?.initialGuesses ?? [];
 
   const [goal, setGoal] = useState(() =>
     isMultiplayer ? null : getRandomWord(language, wordLength),
   );
-  const [guesses, setGuesses] = useState(makeEmptyGuesses);
-  const [results, setResults] = useState(makeEmptyResults);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [status, setStatus] = useState("playing"); // playing | won | lost
-  const [keyboardStates, setKeyboardStates] = useState(() => Array(alphabet.length).fill(0));
+  const [guesses, setGuesses] = useState(() => {
+    const base = Array(tries).fill("");
+    initialGuesses.forEach((g, i) => {
+      if (i < tries) base[i] = g.guess;
+    });
+    return base;
+  });
+  const [results, setResults] = useState(() => {
+    const base = Array(tries).fill(null);
+    initialGuesses.forEach((g, i) => {
+      if (i < tries) base[i] = g.states;
+    });
+    return base;
+  });
+  const [currentIndex, setCurrentIndex] = useState(() =>
+    Math.min(initialGuesses.length, tries),
+  );
+  const [status, setStatus] = useState(() => {
+    if (multiplayer?.initialFinished) return multiplayer.initialWon ? "won" : "lost";
+    return "playing";
+  }); // playing | won | lost
+  const [keyboardStates, setKeyboardStates] = useState(() => {
+    let states = Array(alphabet.length).fill(0);
+    for (const g of initialGuesses) {
+      states = mergeKeyboardStates(states, alphabet, g.guess, g.states);
+    }
+    return states;
+  });
   const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [nowTick, setNowTick] = useState(() => Date.now());
 
   const isFocusedRef = useRef(true);
   const containerRef = useRef(null);
   const errorTimeoutRef = useRef(null);
+
+  const timeLimit = multiplayer?.timeLimit ?? 0;
+  const startedAt = multiplayer?.startedAt ?? null;
+
+  useEffect(() => {
+    if (!isMultiplayer || !timeLimit) return;
+    const id = setInterval(() => setNowTick(Date.now()), 500);
+    return () => clearInterval(id);
+  }, [isMultiplayer, timeLimit, startedAt]);
+
+  let remainingSeconds = null;
+  let remainingRatio = 1;
+  if (isMultiplayer && timeLimit && startedAt) {
+    const remainingMs = Math.max(0, timeLimit * 1000 - (nowTick - startedAt));
+    remainingSeconds = Math.ceil(remainingMs / 1000);
+    remainingRatio = remainingMs / (timeLimit * 1000);
+  }
+  const timerLevel = remainingRatio > 0.5 ? "green" : remainingRatio > 0.2 ? "yellow" : "red";
+  const timerTextClass = {
+    green: "text-green-400",
+    yellow: "text-yellow-400",
+    red: "text-red-500",
+  }[timerLevel];
+  const timerBarClass = {
+    green: "bg-green-400",
+    yellow: "bg-yellow-400",
+    red: "bg-red-500",
+  }[timerLevel];
 
   useEffect(() => {
     containerRef.current?.focus();
@@ -209,7 +263,7 @@ function Game({ multiplayer }) {
       }}
       className="w-full flex flex-col items-center justify-center min-h-screen p-4"
     >
-      {status !== "playing" && (
+      {status !== "playing" && !isMultiplayer && (
         <EndGameScreen
           reset={() => resetGame()}
           win={status === "won"}
@@ -225,6 +279,27 @@ function Game({ multiplayer }) {
         <p className="text-gray-400 text-sm mb-2">
           Round {multiplayer.roundIndex} / {multiplayer.totalRounds}
         </p>
+      )}
+
+      {isMultiplayer && remainingSeconds !== null && (
+        <div className="w-48 mb-3">
+          <div className={`text-center text-sm font-semibold mb-1 ${timerTextClass}`}>
+            {remainingSeconds}s
+          </div>
+          <div className="h-1.5 rounded-full bg-neutral-700 overflow-hidden">
+            <div
+              className={`h-full ${timerBarClass} transition-all duration-500 ease-linear`}
+              style={{ width: `${Math.max(0, Math.min(100, remainingRatio * 100))}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {isMultiplayer && status !== "playing" && (
+        <div className="mb-3 text-center dark:text-white">
+          <p className="font-bold text-2xl">{status === "won" ? strings.win : strings.lose}</p>
+          <p className="text-gray-400 text-sm mt-1">Waiting for other players…</p>
+        </div>
       )}
 
       {!isMultiplayer && (
